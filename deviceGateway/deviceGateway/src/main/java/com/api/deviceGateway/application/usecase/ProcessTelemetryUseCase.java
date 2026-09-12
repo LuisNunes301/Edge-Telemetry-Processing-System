@@ -17,7 +17,7 @@ public class ProcessTelemetryUseCase {
     public void execute(DeviceTelemetry telemetry){
 
         if( telemetry.deviceId() == null || telemetry.deviceId().isBlank()){
-            throw new ValidationException("Device Id must be real");
+            throw new ValidationException("Device Id must be realvamo");
         }
         publisher.publish(telemetry);
     }
