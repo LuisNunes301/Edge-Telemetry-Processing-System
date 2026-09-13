@@ -1,0 +1,13 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: 'device-gateway'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['gateway:8080']
+
+  - job_name: 'telemetry-processor'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['processor:8081']

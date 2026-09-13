@@ -2,33 +2,55 @@ package com.api.telemetryProcessor.application.usecase;
 
 import com.api.telemetryProcessor.domain.entity.TelemetryEvent;
 import com.api.telemetryProcessor.domain.port.out.TelemetryRepositoryPort;
+
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Counter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
 
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
 class ProcessAndPersistTelemetryUseCaseTest {
 
-    @Test
-    @DisplayName("Deve processar e delegar a persistência do evento de telemetria com sucesso")
-    void shouldProcessAndPersistSuccessfully() {
-        // Arrange
-        TelemetryRepositoryPort repositoryPort = Mockito.mock(TelemetryRepositoryPort.class);
-        ProcessAndPersistTelemetryUseCase useCase = new ProcessAndPersistTelemetryUseCase(repositoryPort);
+    @Mock
+    private TelemetryRepositoryPort repositoryPort;
 
+    @Mock
+    private MeterRegistry meterRegistry; // <-- Adicione o mock do MeterRegistry
+
+    @Mock
+    private Counter counter; // <-- Mock opcional do Counter para evitar NullPointerException se o UseCase registrar métrica no construtor
+
+    @InjectMocks
+    private ProcessAndPersistTelemetryUseCase useCase;
+
+    @Test
+    @DisplayName("Deve processar e persistir o evento de telemetria com sucesso")
+    void shouldProcessAndPersistSuccessfully() {
+        // Configura o mock do registry para retornar um counter válido caso seja chamado
+        when(meterRegistry.counter(anyString())).thenReturn(counter);
+
+        // Arrange
         TelemetryEvent event = new TelemetryEvent(
-            "TRK-TEST-01",
+            "TRK-CAM-092",
             Instant.now(),
-            new TelemetryEvent.Location(-12.97, -38.50),
-            new TelemetryEvent.Metrics(22.5, 65.0, 95.0),
-            new TelemetryEvent.Metadata("1.0.0", "4G")
+            new TelemetryEvent.Location(-12.697341, -38.323712),
+            new TelemetryEvent.Metrics(-1.24, 48.7, 99.6),
+            new TelemetryEvent.Metadata("1.2.4", "4G")
         );
 
         // Act
         useCase.execute(event);
 
         // Assert
-        Mockito.verify(repositoryPort, Mockito.times(1)).save(event);
+        verify(repositoryPort, times(1)).save(event);
     }
 }

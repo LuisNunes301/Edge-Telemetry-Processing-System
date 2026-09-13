@@ -3,7 +3,7 @@ package com.api.telemetryProcessor.application.config;
 import com.api.telemetryProcessor.application.usecase.ProcessAndPersistTelemetryUseCase;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
+import io.micrometer.core.instrument.MeterRegistry;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,8 +16,9 @@ import com.api.telemetryProcessor.domain.port.out.TelemetryRepositoryPort;
 public class BeanConfiguration {
 
     @Bean
-    public ProcessAndPersistTelemetryUseCase processAndPersistTelemetryUseCase(TelemetryRepositoryPort repositoryPort) {
-        return new ProcessAndPersistTelemetryUseCase(repositoryPort);
+    public ProcessAndPersistTelemetryUseCase processAndPersistTelemetryUseCase(TelemetryRepositoryPort repositoryPort,
+    MeterRegistry meterRegistry) {
+        return new ProcessAndPersistTelemetryUseCase(repositoryPort,meterRegistry);
     }
 
     @Bean

@@ -85,11 +85,58 @@ docker exec -it telemetry-db psql -U postgres -d telemetry_db -c "SELECT device_
 
 ```
 
+## 5. Métricas e Observabilidade
+
+O pipeline conta com uma stack de monitoramento nativa integrada via **Micrometer**, **Spring Boot Actuator**, **Prometheus** e **Grafana**, permitindo o acompanhamento em tempo real da saúde, vazão e latência dos microsserviços.
+
+### Principais Métricas Expostas
+
+| Métrica (PromQL) | Tipo | Descrição / Objetivo |
+| :--- | :--- | :--- |
+| `telemetry_processed_success_total` | Contador Customizado | Total de eventos de telemetria processados e salvos com sucesso pelo `telemetryProcessor`. |
+| `telemetry_processed_errors_total` | Contador Customizado | Total de falhas ou exceções ocorridas durante o pipeline de persistência. |
+| `http_server_requests_seconds_count` | Histograma (Micrometer) | Taxa total de requisições HTTP recebidas pelo `deviceGateway` (RED Method - Request Rate). |
+| `http_server_requests_seconds_bucket` | Histograma (Micrometer) | Distribuição de latência de resposta do Gateway para cálculo de percentis (ex: P95). |
+
+### Acessando os Dashboards
+
+1. **Prometheus (Targets & Alvos):** Acesse `http://localhost:9090/targets` para validar se o `gateway` e o `processor` estão ativos e respondendo na aba de escuta de métricas.
+2. **Grafana (Visualização):** Acesse `http://localhost:3000` (com credenciais configuradas no `.env`) para construir o dashboard utilizando o **Prometheus** como Data Source. 
+
+Recomenda-se estruturar painéis com as seguintes queries do PromQL:
+
+* **Taxa de Sucesso (Processador):**
+```promql
+  rate(telemetry_processed_success_total[1m])
+
+```
+
+* **Erros no Pipeline:**
+```promql
+rate(telemetry_processed_errors_total[1m])
+
+```
+
+
+* **Tráfego HTTP na Borda (Gateway RPS):**
+```promql
+sum(rate(http_server_requests_seconds_count[1m]))
+
+```
+
+
+* **Latência P95 do Gateway:**
+```promql
+histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket[1m])) by (le))
+
+```
+
 ---
 
-## 🛠️ Stack Tecnológica
+##  Stack Tecnológica
 
 * **Core:** Java 21, Spring Boot 3.3.3
 * **Mensageria:** Apache Kafka (Confluent Platform 7.7.0)
 * **Banco de Dados:** PostgreSQL 15
 * **Infraestrutura:** Docker Compose (Rede Bridge customizada)
+* **Observabilidade:** Grafana e Prometheus
