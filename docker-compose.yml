@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:15-alpine
@@ -12,6 +10,10 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          memory: 256M
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
@@ -21,21 +23,47 @@ services:
       - telemetry-network
 
   kafka:
-    image: bitnami/kafka:3.7.0
+    image: confluentinc/cp-kafka:7.7.0
     container_name: telemetry-kafka
     ports:
       - "${KAFKA_PORT}:${KAFKA_PORT}"
     environment:
-      KAFKA_CFG_NODE_ID: 1
-      KAFKA_CFG_PROCESS_ROLES: controller,broker
-      KAFKA_CFG_LISTENERS: PLAINTEXT://:${KAFKA_PORT},CONTROLLER://:${KAFKA_CONTROLLER_PORT}
-      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
-      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@kafka:${KAFKA_CONTROLLER_PORT}
-      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://localhost:${KAFKA_PORT}
-      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://telemetry-kafka:29092,PLAINTEXT_HOST://localhost:${KAFKA_PORT}
+      KAFKA_LISTENERS: PLAINTEXT://telemetry-kafka:29092,CONTROLLER://telemetry-kafka:${KAFKA_CONTROLLER_PORT},PLAINTEXT_HOST://0.0.0.0:${KAFKA_PORT}
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@telemetry-kafka:${KAFKA_CONTROLLER_PORT}
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_HEAP_OPTS: "-Xmx256m -Xms256m"
+      KAFKA_NUM_NETWORK_THREADS: 2
+      KAFKA_NUM_IO_THREADS: 2
     volumes:
-      - kafka_data:/bitnami/kafka
+      - kafka_data:/var/lib/kafka/data
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    networks:
+      - telemetry-network
+
+  gateway:
+    build:
+      context: ./deviceGateway 
+      dockerfile: Dockerfile
+    container_name: telemetry-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: telemetry-kafka:29092
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    depends_on:
+      - kafka
     networks:
       - telemetry-network
 
