@@ -1,10 +1,13 @@
 package com.api.deviceGateway.application.usecase;
 
+import org.springframework.stereotype.Service;
+
 import com.api.deviceGateway.domain.entity.DeviceTelemetry;
+import com.api.deviceGateway.domain.exception.ValidationException;
 import com.api.deviceGateway.domain.port.TelemetryPublisherPort;
 
-import jakarta.validation.ValidationException;
 
+@Service
 public class ProcessTelemetryUseCase {
 
 
