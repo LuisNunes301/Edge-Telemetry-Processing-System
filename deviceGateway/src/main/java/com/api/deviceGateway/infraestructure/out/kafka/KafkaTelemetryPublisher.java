@@ -16,9 +16,9 @@ import tools.jackson.databind.ObjectMapper;
 @Component
 public class KafkaTelemetryPublisher implements TelemetryPublisherPort {
 
-    private final KafkaTemplate<String, String> kafkaTemplate; // Alterado para <String, String>
+    private final KafkaTemplate<String, String> kafkaTemplate; 
     private final String defaultTopic;
-    private final ObjectMapper objectMapper;                    // Serializador manual limpo
+    private final ObjectMapper objectMapper;                   
     private final MeterRegistry meterRegistry;
 
     public KafkaTelemetryPublisher(
@@ -34,24 +34,22 @@ public class KafkaTelemetryPublisher implements TelemetryPublisherPort {
 
     @Override
     public void publish(DeviceTelemetry telemetry) {
+        log.info("====> GATEWAY [1]: Iniciando publicacao. Topico Alvo: '{}', Device: {}", defaultTopic, telemetry.deviceId());
         try {
-            // Converte a entidade de domínio diretamente para uma String JSON limpa
             String payloadJson = objectMapper.writeValueAsString(telemetry);
+            log.info("====> GATEWAY [2]: JSON convertido com sucesso: {}", payloadJson);
 
             kafkaTemplate.send(defaultTopic, telemetry.deviceId(), payloadJson)
                     .whenComplete((result, ex) -> {
                         if (ex == null) {
-                            meterRegistry.counter("kafka.publish.success", "topic", defaultTopic).increment();
-                            log.debug("Telemetria enviada com sucesso: {}", telemetry.deviceId());
+                            log.info("====> GATEWAY [3]: SUCESSO ABSOLUTO! Mensagem no Kafka. Offset: {}", result.getRecordMetadata().offset());
                         } else {
-                            meterRegistry.counter("kafka.publish.error", "topic", defaultTopic).increment();
-                            log.error("Falha ao publicar no Kafka. Device: {}. Erro: {}", 
-                                    telemetry.deviceId(), ex.getMessage());
+                            log.error("====> GATEWAY [ERRO KAFKA]: Falha ao publicar: {}", ex.getMessage());
                         }
                     });
         } catch (Exception e) {
-            log.error("Erro crítico ao serializar telemetria para JSON. Device: {}", telemetry.deviceId(), e);
-            throw new RuntimeException("Falha na serialização da mensagem", e);
+            log.error("====> GATEWAY [ERRO SERIALIZAÇÃO]: O Jackson falhou ao converter o objeto: ", e);
+            throw new RuntimeException("Falha na serialização", e);
         }
     }
 }

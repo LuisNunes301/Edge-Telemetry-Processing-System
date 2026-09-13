@@ -1,14 +1,14 @@
 {
   "deviceId": "TRK-CAM-092",
-  "timestamp": "2026-09-13T00:55:21.343493Z",
+  "timestamp": "2026-09-13T03:50:13.986660Z",
   "location": {
-    "latitude": -12.697133,
-    "longitude": -38.323768
+    "latitude": -12.697114,
+    "longitude": -38.324299
   },
   "metrics": {
-    "temperature": 2.12,
-    "humidity": 49.5,
-    "batteryLevel": 99.8
+    "temperature": -4.79,
+    "humidity": 57.8,
+    "batteryLevel": 99.6
   },
   "metadata": {
     "firmwareVersion": "1.2.4",
