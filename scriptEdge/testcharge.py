@@ -41,9 +41,12 @@ def simulate_device(device_id):
                 "networkType": "4G"
             }
         }
-        
+        headers = {
+    "X-API-Key": "iot-secure-secret-key-2026"
+}
         try:
-            response = requests.post(API_URL, json=payload, timeout=2)
+            
+            response = requests.post(API_URL, json=payload,headers=headers, timeout=2)
             print(f"[{payload['deviceId']}] Status: {response.status_code} | Temp: {payload['metrics']['temperature']}°C")
         except requests.exceptions.RequestException:
             print(f"[{payload['deviceId']}] Falha na conexão com o Gateway.")

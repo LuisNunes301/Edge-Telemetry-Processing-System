@@ -59,7 +59,8 @@ services:
     ports:
       - "${GATEWAY_PORT}:${GATEWAY_PORT}"
     environment:
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: telemetry-kafka:29092
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=telemetry-kafka:29092
+      - GATEWAY_API_KEY=${GATEWAY_API_KEY}
     deploy:
       resources:
         limits:

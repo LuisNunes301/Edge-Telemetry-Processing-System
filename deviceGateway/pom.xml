@@ -48,10 +48,10 @@
         </dependency>
 
         <!-- Segurança (Opcional para a ingestão inicial, mas mantido conforme sua escolha) -->
-        <!-- <dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
-        </dependency> -->
+        </dependency>
 
         <!-- Utilitários -->
         <dependency>

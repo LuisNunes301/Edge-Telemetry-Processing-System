@@ -11,12 +11,10 @@ import org.springframework.util.backoff.FixedBackOff;
 @Configuration
 public class KafkaConsumerConfig {
 
-
     @Bean
-    public DefaultErrorHandler errorHandler(KafkaOperations
-    <Object,Object> tempate){
+    public DefaultErrorHandler errorHandler(KafkaOperations<Object, Object> template) {
         // Vai tentar processar 3 vezes, aguardando 2 segundos a cada tentativa
-        FixedBackOff fixedBackOff = new FixedBackOff(200L,3L);
+        FixedBackOff fixedBackOff = new FixedBackOff(200L, 3L);
         // Configura o recoverer para enviar a mensagem falha para o tópico
         DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(template,
                 (r, e) -> new TopicPartition(r.topic() + ".DLT", r.partition()));
