@@ -84,8 +84,30 @@ Verifique se os dados foram processados e gravados no PostgreSQL:
 docker exec -it telemetry-db psql -U postgres -d telemetry_db -c "SELECT device_id, temperature, humidity, event_timestamp FROM telemetry_events;"
 
 ```
+## 5. Json esperado do IOT
 
-## 5. Métricas e Observabilidade
+```bash
+{
+  "deviceId": "TRK-CAM-092",
+  "timestamp": "2026-09-13T20:01:17.183959Z",
+  "location": {
+    "latitude": -12.697313,
+    "longitude": -38.32404
+  },
+  "metrics": {
+    "temperature": -0.0,
+    "humidity": 51.3,
+    "batteryLevel": 99.9
+  },
+  "metadata": {
+    "firmwareVersion": "1.2.4",
+    "networkType": "4G"
+  }
+}
+
+```
+
+## 6. Métricas e Observabilidade
 
 O pipeline conta com uma stack de monitoramento nativa integrada via **Micrometer**, **Spring Boot Actuator**, **Prometheus** e **Grafana**, permitindo o acompanhamento em tempo real da saúde, vazão e latência dos microsserviços.
 

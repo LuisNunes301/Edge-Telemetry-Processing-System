@@ -125,7 +125,20 @@ services:
         limits:
           memory: 256M 
           cpus: '0.50'  
-
+  # charge test
+  simulator:
+    build: ./scriptEdge
+    container_name: telemetry-simulator
+    environment:
+      - API_URL=http://gateway:8080/api/telemetry
+    depends_on:
+      - gateway
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    networks:
+      - telemetry-network
 volumes:
   postgres_data:
   kafka_data:
